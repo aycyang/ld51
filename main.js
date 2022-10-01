@@ -64,32 +64,85 @@ function roundToTenth(n) {
     return Math.round(n * 10) / 10;
 }
 
-function resultAsString(problem, answer) {
+function resultAsString(problem, answer, elapsed) {
     const isCorrect = checkAnswer(problem, answer) ? "\u2705" : "\u274c"
     const correctAnswer = roundToTenth(solveProblem(problem))
-    return `${isCorrect} ${problemAsString(problem)} -> ${answer} (${correctAnswer})`;
+    return `${isCorrect} ${problemAsString(problem)} | ${answer} (${correctAnswer}) | ${roundToTenth(elapsed*1e-3)}s`;
 }
 
-let problem = generateProblem()
-const problemDiv = document.getElementById("problem")
-const resultsDiv = document.getElementById("results")
-const form = document.getElementById("form")
+function th(html) {
+    const result = document.createElement("th")
+    result.innerHTML = html
+    return result
+}
 
-problemDiv.innerHTML = problemAsString(problem)
+function td(html) {
+    const result = document.createElement("td")
+    result.innerHTML = html
+    return result
+}
 
-form.addEventListener('submit', event => {
-    event.preventDefault()
-    // get the contents of the form
-    const formData = new FormData(event.target)
-    const entriesObject = Object.fromEntries(formData.entries())
-    const answer = entriesObject.answer
-    // clear the form
-    event.target.reset()
+function enterGameMode() {
+    let startTime = null
+    let problem = null
 
-    const newDiv = document.createElement("div")
-    newDiv.innerHTML = resultAsString(problem, answer)
-    resultsDiv.prepend(newDiv)
+    const problemDiv = document.createElement("div")
+    const resultsTable = document.createElement("table")
+    resultsTable.border = 1
+    const resultsTableHeaderRow = document.createElement("tr")
+    resultsTableHeaderRow.append(th("\u{2753}"))
+    resultsTableHeaderRow.append(th("\u{270F}"))
+    resultsTableHeaderRow.append(th("\u{1F9E0}"))
+    resultsTableHeaderRow.append(th("\u{1F916}"))
+    resultsTableHeaderRow.append(th("\u{23F1}"))
+    resultsTable.append(resultsTableHeaderRow)
+    const answerInput = document.createElement("input")
+    answerInput.type = "text"
+    answerInput.name = "answer"
+    const submitInput = document.createElement("input")
+    submitInput.type = "submit"
+    const form = document.createElement("form")
+    form.append(answerInput, submitInput)
+    form.addEventListener('submit', event => {
+        event.preventDefault()
+        // get the contents of the form
+        const formData = new FormData(event.target)
+        const entriesObject = Object.fromEntries(formData.entries())
+        const answer = entriesObject.answer
+        const elapsed = Date.now() - startTime
+        // clear the form
+        event.target.reset()
 
+        const newTableRow = document.createElement("tr")
+        const correctAnswer = roundToTenth(solveProblem(problem))
+        const isCorrect = checkAnswer(problem, answer) ? "\u{2705}" : "\u{274C}"
+        newTableRow.appendChild(td(isCorrect))
+        newTableRow.appendChild(td(problemAsString(problem)))
+        newTableRow.appendChild(td(answer))
+        newTableRow.appendChild(td(correctAnswer))
+        newTableRow.appendChild(td(`${roundToTenth(elapsed/1000)} s`))
+        resultsTableHeaderRow.insertAdjacentElement("afterEnd", newTableRow)
+
+        startTime = Date.now()
+        problem = generateProblem()
+        problemDiv.innerHTML = problemAsString(problem)
+    })
+
+    document.body.append(problemDiv)
+    document.body.append(form)
+    document.body.append(resultsTable)
+
+    startTime = Date.now()
     problem = generateProblem()
     problemDiv.innerHTML = problemAsString(problem)
+    answerInput.focus()
+}
+
+const startButton = document.createElement("button")
+startButton.innerHTML = "Start!"
+document.body.append(startButton)
+startButton.addEventListener("click", event => {
+    document.body.removeChild(event.target)
+    enterGameMode()
 })
+
