@@ -100,7 +100,7 @@ function generateProblem() {
 }
 
 function approxEqual(a, b, errorMargin) {
-    return Math.abs(a - b) < errorMargin
+    return Math.abs(a - b) <= errorMargin
 }
 
 function checkAnswer(problem, answer) {
