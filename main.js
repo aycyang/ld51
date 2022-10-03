@@ -1,24 +1,54 @@
 "using strict"
 
+class Result {
+    constructor(problemNumber, problem, answer, elapsed) {
+        this.problemNumber = problemNumber
+        this.problem = problem
+        this.answer = answer
+        this.elapsed = elapsed // in seconds, not milliseconds
+    }
+
+    score() {
+        if (!checkAnswer(this.problem, this.answer)) {
+            return 0
+        }
+        const roundedElapsed = roundToTenth(this.elapsed)
+        if (roundedElapsed <= 10) {
+            return 5
+        } else if (roundedElapsed <= 20) {
+            return 4
+        } else if (roundedElapsed <= 30) {
+            return 3
+        } else if (roundedElapsed <= 45) {
+            return 2
+        } else {
+            return 1
+        }
+    }
+
+    toTableRow() {
+        const newTableRow = document.createElement("tr")
+        const correctAnswer = roundToTenth(solveProblem(this.problem))
+        const isCorrect = checkAnswer(this.problem, this.answer) ? "\u{2705}" : "\u{274C}"
+        const roundedElapsed = roundToTenth(this.elapsed)
+        const scoreIncrement = this.score()
+        newTableRow.appendChild(td(this.problemNumber))
+        newTableRow.appendChild(td(isCorrect))
+        newTableRow.appendChild(td(problemAsString(this.problem)))
+        newTableRow.appendChild(td(this.answer))
+        newTableRow.appendChild(td(correctAnswer))
+        newTableRow.appendChild(td(`${roundedElapsed}s`))
+        newTableRow.appendChild(td(`+${scoreIncrement}`))
+        return newTableRow
+    }
+}
+
 function celsiusToFahrenheit(celsius) {
     return celsius * 9 / 5 + 32
 }
 
 function fahrenheitToCelsius(fahrenheit) {
     return (fahrenheit - 32) * 5 / 9
-}
-
-function calculateScore(problem, answer, t) {
-    if (!checkAnswer(problem, answer)) {
-        return 0
-    }
-    if (t < 10) {
-        return 5
-    } else if (t < 30) {
-        return 4
-    } else {
-        return 3
-    }
 }
 
 function calculateGrade(score) {
@@ -134,17 +164,19 @@ function hr() {
     return document.createElement("hr")
 }
 
-function enterOverviewMode(score) {
+function enterOverviewMode(results) {
+    const score = results.map(r => r.score()).reduce((a, b) => a + b)
+    const avgTime = roundToTenth(results.map(r => r.elapsed).reduce((a, b) => a + b) / results.length)
     document.body.prepend(hr())
-    document.body.prepend(div(`Grade: ${calculateGrade(score)}`))
+    document.body.prepend(div(`Average time: ${avgTime}s`))
     document.body.prepend(div(`Final score: ${score} out of 100`))
 }
 
 function enterGameMode() {
     let startTime = null
     let problem = null
-    let score = 0
     let problemNumber = 1
+    let results = []
 
     const problemDiv = document.createElement("div")
     const resultsTable = document.createElement("table")
@@ -175,21 +207,11 @@ function enterGameMode() {
         // clear the form
         event.target.reset()
         // save the result
-        const newTableRow = document.createElement("tr")
-        const correctAnswer = roundToTenth(solveProblem(problem))
-        const isCorrect = checkAnswer(problem, answer) ? "\u{2705}" : "\u{274C}"
-        const roundedElapsed = roundToTenth(elapsed/1000)
-        const scoreIncrement = calculateScore(problem, answer, roundedElapsed)
-        newTableRow.appendChild(td(problemNumber))
-        newTableRow.appendChild(td(isCorrect))
-        newTableRow.appendChild(td(problemAsString(problem)))
-        newTableRow.appendChild(td(answer))
-        newTableRow.appendChild(td(correctAnswer))
-        newTableRow.appendChild(td(`${roundedElapsed}s`))
-        newTableRow.appendChild(td(`+${scoreIncrement}`))
+        const result = new Result(problemNumber, problem, answer, elapsed/1000)
+        results.push(result)
+        const newTableRow = result.toTableRow()
         resultsTableHeaderRow.insertAdjacentElement("afterEnd", newTableRow)
 
-        score += scoreIncrement
         problemNumber++
 
         if (problemNumber <= 20) {
@@ -201,7 +223,7 @@ function enterGameMode() {
 
         document.body.removeChild(problemDiv)
         document.body.removeChild(form)
-        enterOverviewMode(score)
+        enterOverviewMode(results)
     })
 
     document.body.append(problemDiv)
