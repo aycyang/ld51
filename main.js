@@ -193,7 +193,7 @@ function enterGameMode() {
     let results = []
 
     const problemDiv = document.createElement("div")
-    problemDiv.style = "display:flex;justify-content:center;"
+    problemDiv.style = "display:flex;justify-content:center;font-size:24px"
     const resultsTable = document.createElement("table")
     resultsTable.border = 1
     const resultsTableHeaderRow = document.createElement("tr")
@@ -209,8 +209,10 @@ function enterGameMode() {
     answerInput.type = "number"
     answerInput.step = "0.1"
     answerInput.name = "answer"
+    answerInput.style = "font-size:24px"
     const submitInput = document.createElement("input")
     submitInput.type = "submit"
+    submitInput.style = "font-size:18px"
     const form = document.createElement("form")
     form.style = "display:flex;justify-content:center;"
     form.append(answerInput, submitInput)
@@ -259,7 +261,7 @@ function enterGameMode() {
 
 const startButton = document.createElement("button")
 startButton.innerHTML = "Start!"
-startButton.style = "padding:12px 24px;"
+startButton.style = "padding:12px 24px;font-size:18px;"
 const startButtonDiv = div("")
 startButtonDiv.append(startButton)
 startButtonDiv.style = "display:flex;justify-content:center;"
