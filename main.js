@@ -186,7 +186,8 @@ function enterGameMode() {
     resultsTableHeaderRow.append(th("\u{1F34E}"))
     resultsTable.append(resultsTableHeaderRow)
     const answerInput = document.createElement("input")
-    answerInput.type = "text"
+    answerInput.type = "number"
+    answerInput.step = "0.1"
     answerInput.name = "answer"
     const submitInput = document.createElement("input")
     submitInput.type = "submit"
@@ -223,6 +224,7 @@ function enterGameMode() {
 
     document.body.append(problemDiv)
     document.body.append(form)
+    document.body.append(hr())
     document.body.append(resultsTable)
 
     startTime = Date.now()
