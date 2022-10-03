@@ -8,6 +8,48 @@ function fahrenheitToCelsius(fahrenheit) {
     return (fahrenheit - 32) * 5 / 9
 }
 
+function calculateScore(problem, answer, t) {
+    if (!checkAnswer(problem, answer)) {
+        return 0
+    }
+    if (t < 10) {
+        return 5
+    } else if (t < 30) {
+        return 4
+    } else {
+        return 3
+    }
+}
+
+function calculateGrade(score) {
+    if (score < 60) {
+        return "F"
+    } else if (score < 70) {
+        return "D"
+    } else {
+
+        const onesDigit = score % 10
+        let qualifier = ""
+        if (onesDigit < 3) {
+            qualifier = "-"
+        } else if (onesDigit < 7) {
+            qualifier = ""
+        } else {
+            qualifier = "+"
+        }
+
+        if (score < 80) {
+            return "C" + qualifier
+        } else if (score < 90) {
+            return "B" + qualifier
+        } else if (score < 100) {
+            return "A" + qualifier
+        } else {
+            return "A+"
+        }
+    }
+}
+
 function randomInteger() {
     if (arguments.length == 0) {
         throw new Error("range unspecified")
@@ -61,13 +103,13 @@ function problemAsString(problem) {
 }
 
 function roundToTenth(n) {
-    return Math.round(n * 10) / 10;
+    return Math.round(n * 10) / 10
 }
 
 function resultAsString(problem, answer, elapsed) {
     const isCorrect = checkAnswer(problem, answer) ? "\u2705" : "\u274c"
     const correctAnswer = roundToTenth(solveProblem(problem))
-    return `${isCorrect} ${problemAsString(problem)} | ${answer} (${correctAnswer}) | ${roundToTenth(elapsed*1e-3)}s`;
+    return `${isCorrect} ${problemAsString(problem)} | ${answer} (${correctAnswer}) | ${roundToTenth(elapsed*1e-3)}s`
 }
 
 function th(html) {
@@ -82,19 +124,39 @@ function td(html) {
     return result
 }
 
+function div(html) {
+    const result = document.createElement("div")
+    result.innerHTML = html
+    return result
+}
+
+function hr() {
+    return document.createElement("hr")
+}
+
+function enterOverviewMode(score) {
+    document.body.prepend(hr())
+    document.body.prepend(div(`Grade: ${calculateGrade(score)}`))
+    document.body.prepend(div(`Final score: ${score} out of 100`))
+}
+
 function enterGameMode() {
     let startTime = null
     let problem = null
+    let score = 0
+    let problemNumber = 1
 
     const problemDiv = document.createElement("div")
     const resultsTable = document.createElement("table")
     resultsTable.border = 1
     const resultsTableHeaderRow = document.createElement("tr")
+    resultsTableHeaderRow.append(th("\u{23}\u{FE0F}\u{20E3}"))
     resultsTableHeaderRow.append(th("\u{2753}"))
-    resultsTableHeaderRow.append(th("\u{270F}"))
+    resultsTableHeaderRow.append(th("\u{270F}\u{FE0F}"))
     resultsTableHeaderRow.append(th("\u{1F9E0}"))
     resultsTableHeaderRow.append(th("\u{1F916}"))
     resultsTableHeaderRow.append(th("\u{23F1}"))
+    resultsTableHeaderRow.append(th("\u{1F34E}"))
     resultsTable.append(resultsTableHeaderRow)
     const answerInput = document.createElement("input")
     answerInput.type = "text"
@@ -112,20 +174,34 @@ function enterGameMode() {
         const elapsed = Date.now() - startTime
         // clear the form
         event.target.reset()
-
+        // save the result
         const newTableRow = document.createElement("tr")
         const correctAnswer = roundToTenth(solveProblem(problem))
         const isCorrect = checkAnswer(problem, answer) ? "\u{2705}" : "\u{274C}"
+        const roundedElapsed = roundToTenth(elapsed/1000)
+        const scoreIncrement = calculateScore(problem, answer, roundedElapsed)
+        newTableRow.appendChild(td(problemNumber))
         newTableRow.appendChild(td(isCorrect))
         newTableRow.appendChild(td(problemAsString(problem)))
         newTableRow.appendChild(td(answer))
         newTableRow.appendChild(td(correctAnswer))
-        newTableRow.appendChild(td(`${roundToTenth(elapsed/1000)} s`))
+        newTableRow.appendChild(td(`${roundedElapsed}s`))
+        newTableRow.appendChild(td(`+${scoreIncrement}`))
         resultsTableHeaderRow.insertAdjacentElement("afterEnd", newTableRow)
 
-        startTime = Date.now()
-        problem = generateProblem()
-        problemDiv.innerHTML = problemAsString(problem)
+        score += scoreIncrement
+        problemNumber++
+
+        if (problemNumber <= 20) {
+            startTime = Date.now()
+            problem = generateProblem()
+            problemDiv.innerHTML = problemAsString(problem)
+            return
+        }
+
+        document.body.removeChild(problemDiv)
+        document.body.removeChild(form)
+        enterOverviewMode(score)
     })
 
     document.body.append(problemDiv)
