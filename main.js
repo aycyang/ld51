@@ -9,7 +9,7 @@ class Result {
     }
 
     score() {
-        if (!checkAnswer(this.problem, this.answer)) {
+        if (!this.check()) {
             return 0
         }
         const roundedElapsed = roundToTenth(this.elapsed)
@@ -26,10 +26,23 @@ class Result {
         }
     }
 
+    check() {
+        if (!!this.problem.fahrenheit) {
+            return approxEqual(this.answer,
+                fahrenheitToCelsius(this.problem.fahrenheit),
+                2)
+        } else {
+            return approxEqual(this.answer,
+                celsiusToFahrenheit(this.problem.celsius),
+                2)
+
+        }
+    }
+
     toTableRow() {
         const newTableRow = document.createElement("tr")
         const correctAnswer = roundToTenth(solveProblem(this.problem))
-        const isCorrect = checkAnswer(this.problem, this.answer) ? "\u{2705}" : "\u{274C}"
+        const isCorrect = this.check() ? "\u{2705}" : "\u{274C}"
         const roundedElapsed = roundToTenth(this.elapsed)
         const scoreIncrement = this.score()
         newTableRow.appendChild(td(this.problemNumber))
@@ -103,19 +116,6 @@ function approxEqual(a, b, errorMargin) {
     return Math.abs(a - b) <= errorMargin
 }
 
-function checkAnswer(problem, answer) {
-    if (!!problem.fahrenheit) {
-        return approxEqual(answer,
-            fahrenheitToCelsius(problem.fahrenheit),
-            2)
-    } else {
-        return approxEqual(answer,
-            celsiusToFahrenheit(problem.celsius),
-            2)
-
-    }
-}
-
 function solveProblem(problem) {
     if (!!problem.fahrenheit) {
         return fahrenheitToCelsius(problem.fahrenheit)
@@ -134,12 +134,6 @@ function problemAsString(problem) {
 
 function roundToTenth(n) {
     return Math.round(n * 10) / 10
-}
-
-function resultAsString(problem, answer, elapsed) {
-    const isCorrect = checkAnswer(problem, answer) ? "\u2705" : "\u274c"
-    const correctAnswer = roundToTenth(solveProblem(problem))
-    return `${isCorrect} ${problemAsString(problem)} | ${answer} (${correctAnswer}) | ${roundToTenth(elapsed*1e-3)}s`
 }
 
 function th(html) {
@@ -166,10 +160,11 @@ function hr() {
 
 function enterOverviewMode(results) {
     const score = results.map(r => r.score()).reduce((a, b) => a + b)
+    const numCorrect = results.map(r => r.check() ? 1 : 0).reduce((a, b) => a + b)
     const avgTime = roundToTenth(results.map(r => r.elapsed).reduce((a, b) => a + b) / results.length)
-    document.body.prepend(hr())
-    document.body.prepend(div(`Average time: ${avgTime}s`))
     document.body.prepend(div(`Final score: ${score} out of 100`))
+    document.body.prepend(div(`Average time: ${avgTime}s`))
+    document.body.prepend(div(`Number correct: ${numCorrect} out of 20`))
 }
 
 function enterGameMode() {
