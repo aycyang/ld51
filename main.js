@@ -154,17 +154,36 @@ function div(html) {
     return result
 }
 
+function br() {
+    return document.createElement("br")
+}
+
 function hr() {
     return document.createElement("hr")
+}
+
+function overviewTableRow(label, value) {
+    const result = document.createElement("tr")
+    const labelTd = td(label)
+    labelTd.style = "text-align:right;"
+    const valueTd = td(value)
+    valueTd.style = "text-align:left;"
+    result.append(labelTd, valueTd)
+    return result
 }
 
 function enterOverviewMode(results) {
     const score = results.map(r => r.score()).reduce((a, b) => a + b)
     const numCorrect = results.map(r => r.check() ? 1 : 0).reduce((a, b) => a + b)
     const avgTime = roundToTenth(results.map(r => r.elapsed).reduce((a, b) => a + b) / results.length)
-    document.body.prepend(div(`Final score: ${score} out of 100`))
-    document.body.prepend(div(`Average time: ${avgTime}s`))
-    document.body.prepend(div(`Number correct: ${numCorrect} out of 20`))
+    const overviewTable = document.createElement("table")
+    const overviewTableDiv = div("")
+    overviewTableDiv.append(overviewTable)
+    overviewTableDiv.style = "display:flex;justify-content:center;"
+    overviewTable.append(overviewTableRow("Number correct:", `${numCorrect} out of 20`))
+    overviewTable.append(overviewTableRow("Average time:", `${avgTime}s`))
+    overviewTable.append(overviewTableRow("Final score:", `${score} out of 100`))
+    document.body.prepend(overviewTableDiv)
 }
 
 function enterGameMode() {
@@ -174,6 +193,7 @@ function enterGameMode() {
     let results = []
 
     const problemDiv = document.createElement("div")
+    problemDiv.style = "display:flex;justify-content:center;"
     const resultsTable = document.createElement("table")
     resultsTable.border = 1
     const resultsTableHeaderRow = document.createElement("tr")
@@ -192,6 +212,7 @@ function enterGameMode() {
     const submitInput = document.createElement("input")
     submitInput.type = "submit"
     const form = document.createElement("form")
+    form.style = "display:flex;justify-content:center;"
     form.append(answerInput, submitInput)
     form.addEventListener('submit', event => {
         event.preventDefault()
@@ -225,7 +246,10 @@ function enterGameMode() {
     document.body.append(problemDiv)
     document.body.append(form)
     document.body.append(hr())
-    document.body.append(resultsTable)
+    const resultsTableDiv = div("")
+    resultsTableDiv.append(resultsTable)
+    resultsTableDiv.style = "display:flex;justify-content:center;"
+    document.body.append(resultsTableDiv)
 
     startTime = Date.now()
     problem = generateProblem()
@@ -235,9 +259,13 @@ function enterGameMode() {
 
 const startButton = document.createElement("button")
 startButton.innerHTML = "Start!"
-document.body.append(startButton)
+startButton.style = "padding:12px 24px;"
+const startButtonDiv = div("")
+startButtonDiv.append(startButton)
+startButtonDiv.style = "display:flex;justify-content:center;"
+document.body.append(startButtonDiv)
 startButton.addEventListener("click", event => {
-    document.body.removeChild(event.target)
+    document.body.removeChild(startButtonDiv)
     enterGameMode()
 })
 
