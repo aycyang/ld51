@@ -209,7 +209,7 @@ function enterGameMode() {
     answerInput.type = "number"
     answerInput.step = "0.1"
     answerInput.name = "answer"
-    answerInput.style = "font-size:24px"
+    answerInput.style = "font-size:24px;width:120px"
     const submitInput = document.createElement("input")
     submitInput.type = "submit"
     submitInput.style = "font-size:18px"
