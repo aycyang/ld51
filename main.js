@@ -202,6 +202,17 @@ function overviewTimeBarChart(results) {
     return barchartDiv
 }
 
+function overviewModeErrorToleranceDisplay(errorTolerance) {
+    if (errorTolerance >= 2) {
+        return `Ballpark (\u{00B1}${errorTolerance})`
+    } else if (errorTolerance >= 1) {
+        return `\u{2B50} Smaller ballpark (\u{00B1}${errorTolerance})`
+    } else if (errorTolerance >= 0.5) {
+        return `\u{2B50}\u{2B50} Round to integer (\u{00B1}${errorTolerance})`
+    } else {
+        return `\u{2B50}\u{2B50}\u{2B50} Round to tenth (\u{00B1}${errorTolerance})`
+    }
+}
 
 function enterOverviewMode(results, settings) {
     const score = results.map(r => r.score()).reduce((a, b) => a + b)
@@ -211,7 +222,7 @@ function enterOverviewMode(results, settings) {
     const overviewTableDiv = div("")
     overviewTableDiv.append(overviewTable)
     overviewTableDiv.style = "display:flex;justify-content:center;"
-    overviewTable.append(overviewTableRow("<b>Error tolerance:</b>", `\u{00B1} ${settings.errorTolerance}`))
+    overviewTable.append(overviewTableRow("<b>Error tolerance:</b>", overviewModeErrorToleranceDisplay(settings.errorTolerance)))
     overviewTable.append(overviewTableRow("<b>Number correct:</b>", `${numCorrect} out of 20`))
     overviewTable.append(overviewTableRow("<b>Average time:</b>", `${avgTime}s`))
     overviewTable.append(overviewTableRow("<b>Final score:</b>", `${score} out of 100`))
@@ -317,7 +328,7 @@ function errorToleranceRadioButtonDiv(labelText, value, isChecked) {
     label.style = "font-size:18px;"
     label.appendChild(input)
     label.appendChild(document.createTextNode(
-        `${labelText} (\u{00B1} ${value})`))
+        `${labelText} (\u{00B1}${value})`))
     div.appendChild(label)
     return div
 }
