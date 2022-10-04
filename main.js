@@ -1,11 +1,12 @@
 "using strict"
 
 class Result {
-    constructor(problemNumber, problem, answer, elapsed) {
+    constructor(problemNumber, problem, answer, elapsed, errorTolerance) {
         this.problemNumber = problemNumber
         this.problem = problem
         this.answer = answer
         this.elapsed = elapsed // in seconds, not milliseconds
+        this.errorTolerance = errorTolerance
     }
 
     score() {
@@ -29,12 +30,14 @@ class Result {
     check() {
         if (!!this.problem.fahrenheit) {
             return approxEqual(this.answer,
-                fahrenheitToCelsius(this.problem.fahrenheit),
-                2)
+                roundToTenth(fahrenheitToCelsius(
+                    this.problem.fahrenheit)),
+                this.errorTolerance)
         } else {
             return approxEqual(this.answer,
-                celsiusToFahrenheit(this.problem.celsius),
-                2)
+                roundToTenth(celsiusToFahrenheit(
+                    this.problem.celsius)),
+                this.errorTolerance)
 
         }
     }
@@ -200,7 +203,7 @@ function overviewTimeBarChart(results) {
 }
 
 
-function enterOverviewMode(results) {
+function enterOverviewMode(results, settings) {
     const score = results.map(r => r.score()).reduce((a, b) => a + b)
     const numCorrect = results.map(r => r.check() ? 1 : 0).reduce((a, b) => a + b)
     const avgTime = roundToTenth(results.map(r => r.elapsed).reduce((a, b) => a + b) / results.length)
@@ -208,6 +211,7 @@ function enterOverviewMode(results) {
     const overviewTableDiv = div("")
     overviewTableDiv.append(overviewTable)
     overviewTableDiv.style = "display:flex;justify-content:center;"
+    overviewTable.append(overviewTableRow("<b>Error tolerance:</b>", `\u{00B1} ${settings.errorTolerance}`))
     overviewTable.append(overviewTableRow("<b>Number correct:</b>", `${numCorrect} out of 20`))
     overviewTable.append(overviewTableRow("<b>Average time:</b>", `${avgTime}s`))
     overviewTable.append(overviewTableRow("<b>Final score:</b>", `${score} out of 100`))
@@ -225,11 +229,11 @@ function enterOverviewMode(results) {
         while (document.body.lastChild) {
             document.body.removeChild(document.body.lastChild)
         }
-        enterGameMode()
+        enterGameMode(settings)
     })
 }
 
-function enterGameMode() {
+function enterGameMode(settings) {
     let startTime = null
     let problem = null
     let problemNumber = 1
@@ -269,7 +273,7 @@ function enterGameMode() {
         // clear the form
         event.target.reset()
         // save the result
-        const result = new Result(problemNumber, problem, answer, elapsed/1000)
+        const result = new Result(problemNumber, problem, answer, elapsed/1000, settings.errorTolerance)
         results.push(result)
         const newTableRow = result.toTableRow()
         resultsTableHeaderRow.insertAdjacentElement("afterEnd", newTableRow)
@@ -285,7 +289,7 @@ function enterGameMode() {
 
         document.body.removeChild(problemDiv)
         document.body.removeChild(form)
-        enterOverviewMode(results)
+        enterOverviewMode(results, settings)
     })
 
     document.body.append(problemDiv)
@@ -302,6 +306,22 @@ function enterGameMode() {
     answerInput.focus()
 }
 
+function errorToleranceRadioButtonDiv(labelText, value, isChecked) {
+    const input = document.createElement("input")
+    const label = document.createElement("label")
+    const div = document.createElement("div")
+    input.type = "radio"
+    input.name = "errorTolerance"
+    input.value = value
+    input.checked = isChecked
+    label.style = "font-size:18px;"
+    label.appendChild(input)
+    label.appendChild(document.createTextNode(
+        `${labelText} (\u{00B1} ${value})`))
+    div.appendChild(label)
+    return div
+}
+
 const startButton = document.createElement("button")
 startButton.innerHTML = "Start!"
 startButton.style = "padding:12px 24px;font-size:18px;"
@@ -309,9 +329,21 @@ const startButtonDiv = div("")
 startButtonDiv.append(startButton)
 startButtonDiv.style = "display:flex;justify-content:center;margin:12px;"
 document.body.append(startButtonDiv)
+
+const settingsForm = document.createElement("form")
+settingsForm.style = "display:flex;flex-direction:column;flex-wrap:wrap;align-content:center;"
+settingsForm.append(
+    errorToleranceRadioButtonDiv("Ballpark", 2, true),
+    errorToleranceRadioButtonDiv("Smaller ballpark", 1),
+    errorToleranceRadioButtonDiv("Round to integer", 0.5),
+    errorToleranceRadioButtonDiv("Round to tenths place", 0))
+document.body.append(settingsForm)
+
 startButton.addEventListener("click", event => {
+    const formData = new FormData(settingsForm)
+    const settings = Object.fromEntries(formData.entries())
     while (document.body.lastChild) {
         document.body.removeChild(document.body.lastChild)
     }
-    enterGameMode()
+    enterGameMode(settings)
 })
