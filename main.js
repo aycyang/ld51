@@ -208,9 +208,9 @@ function enterOverviewMode(results) {
     const overviewTableDiv = div("")
     overviewTableDiv.append(overviewTable)
     overviewTableDiv.style = "display:flex;justify-content:center;"
-    overviewTable.append(overviewTableRow("Number correct:", `${numCorrect} out of 20`))
-    overviewTable.append(overviewTableRow("Average time:", `${avgTime}s`))
-    overviewTable.append(overviewTableRow("Final score:", `${score} out of 100`))
+    overviewTable.append(overviewTableRow("<b>Number correct:</b>", `${numCorrect} out of 20`))
+    overviewTable.append(overviewTableRow("<b>Average time:</b>", `${avgTime}s`))
+    overviewTable.append(overviewTableRow("<b>Final score:</b>", `${score} out of 100`))
     document.body.prepend(overviewTimeBarChart(results))
     document.body.prepend(overviewTableDiv)
 }
