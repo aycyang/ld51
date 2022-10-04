@@ -325,10 +325,10 @@ function errorToleranceRadioButtonDiv(labelText, value, isChecked) {
     input.name = "errorTolerance"
     input.value = value
     input.checked = isChecked
-    label.style = "font-size:18px;"
     label.appendChild(input)
     label.appendChild(document.createTextNode(
         `${labelText} (\u{00B1}${value})`))
+    div.className = "radio-container"
     div.appendChild(label)
     return div
 }
@@ -341,14 +341,39 @@ startButtonDiv.append(startButton)
 startButtonDiv.style = "display:flex;justify-content:center;margin:12px;"
 document.body.append(startButtonDiv)
 
-const settingsForm = document.createElement("form")
-settingsForm.style = "display:flex;flex-direction:column;flex-wrap:wrap;align-content:center;"
-settingsForm.append(
+const settingsToggle = document.createElement("a")
+settingsToggle.className = "link-button"
+settingsToggle.innerHTML = "Show advanced settings"
+settingsToggle.href = "#"
+document.body.append(settingsToggle)
+
+const errorToleranceFieldset = document.createElement("fieldset")
+errorToleranceFieldset.append(
     errorToleranceRadioButtonDiv("Ballpark", 2, true),
     errorToleranceRadioButtonDiv("Smaller ballpark", 1),
     errorToleranceRadioButtonDiv("Round to integer", 0.5),
     errorToleranceRadioButtonDiv("Round to tenths place", 0))
+const errorToleranceFieldsetLegend = document.createElement("legend")
+errorToleranceFieldsetLegend.innerHTML = "Error tolerance"
+errorToleranceFieldsetLegend.style = "font-size:20px;"
+errorToleranceFieldset.append(errorToleranceFieldsetLegend)
+
+const settingsForm = document.createElement("form")
+settingsForm.className = "settings"
+settingsForm.style = "display:none;"
+settingsForm.append(errorToleranceFieldset)
+
 document.body.append(settingsForm)
+
+settingsToggle.addEventListener("click", event => {
+    if (settingsForm.style && settingsForm.style.length > 0) {
+        settingsToggle.innerHTML = "Hide advanced settings"
+        settingsForm.style = ""
+    } else {
+        settingsToggle.innerHTML = "Show advanced settings"
+        settingsForm.style = "display:none;"
+    }
+})
 
 startButton.addEventListener("click", event => {
     const formData = new FormData(settingsForm)
