@@ -173,7 +173,8 @@ function overviewTableRow(label, value) {
 }
 
 function overviewTimeBar(result) {
-    const height = Math.min(120, Math.trunc(1 + result.elapsed) * 2)
+    const height = Math.max(5, Math.min(120,
+        Math.trunc(result.elapsed * 2)))
     const barSpan = document.createElement("span")
     barSpan.className = `${result.check() ? "green" : "red"} bar`
     barSpan.style = `height:${height}px;`
@@ -210,8 +211,8 @@ function enterOverviewMode(results) {
     overviewTable.append(overviewTableRow("Number correct:", `${numCorrect} out of 20`))
     overviewTable.append(overviewTableRow("Average time:", `${avgTime}s`))
     overviewTable.append(overviewTableRow("Final score:", `${score} out of 100`))
-    document.body.prepend(overviewTableDiv)
     document.body.prepend(overviewTimeBarChart(results))
+    document.body.prepend(overviewTableDiv)
 }
 
 function enterGameMode() {
@@ -221,7 +222,7 @@ function enterGameMode() {
     let results = []
 
     const problemDiv = document.createElement("div")
-    problemDiv.style = "display:flex;justify-content:center;font-size:24px"
+    problemDiv.style = "display:flex;justify-content:center;font-size:24px;margin:18px 0 12px 0;"
     const resultsTable = document.createElement("table")
     resultsTable.border = 1
     const resultsTableHeaderRow = document.createElement("tr")
@@ -237,10 +238,10 @@ function enterGameMode() {
     answerInput.type = "number"
     answerInput.step = "0.1"
     answerInput.name = "answer"
-    answerInput.style = "font-size:24px;width:120px"
+    answerInput.style = "font-size:24px;width:120px;margin:0 4px;"
     const submitInput = document.createElement("input")
     submitInput.type = "submit"
-    submitInput.style = "font-size:18px"
+    submitInput.style = "font-size:18px;margin:0 4px;"
     const form = document.createElement("form")
     form.style = "display:flex;justify-content:center;"
     form.append(answerInput, submitInput)
