@@ -213,6 +213,20 @@ function enterOverviewMode(results) {
     overviewTable.append(overviewTableRow("<b>Final score:</b>", `${score} out of 100`))
     document.body.prepend(overviewTimeBarChart(results))
     document.body.prepend(overviewTableDiv)
+
+    const resetButton = document.createElement("button")
+    resetButton.innerHTML = "Try again?"
+    resetButton.style = "padding:12px 24px;font-size:18px;"
+    const resetButtonDiv = div("")
+    resetButtonDiv.append(resetButton)
+    resetButtonDiv.style = "display:flex;justify-content:center;margin:12px"
+    document.body.prepend(resetButtonDiv)
+    resetButton.addEventListener("click", event => {
+        while (document.body.lastChild) {
+            document.body.removeChild(document.body.lastChild)
+        }
+        enterGameMode()
+    })
 }
 
 function enterGameMode() {
@@ -293,9 +307,11 @@ startButton.innerHTML = "Start!"
 startButton.style = "padding:12px 24px;font-size:18px;"
 const startButtonDiv = div("")
 startButtonDiv.append(startButton)
-startButtonDiv.style = "display:flex;justify-content:center;"
+startButtonDiv.style = "display:flex;justify-content:center;margin:12px;"
 document.body.append(startButtonDiv)
 startButton.addEventListener("click", event => {
-    document.body.removeChild(startButtonDiv)
+    while (document.body.lastChild) {
+        document.body.removeChild(document.body.lastChild)
+    }
     enterGameMode()
 })
