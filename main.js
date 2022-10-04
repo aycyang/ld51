@@ -172,6 +172,33 @@ function overviewTableRow(label, value) {
     return result
 }
 
+function overviewTimeBar(result) {
+    const height = Math.min(120, Math.trunc(1 + result.elapsed) * 2)
+    const barSpan = document.createElement("span")
+    barSpan.className = `${result.check() ? "green" : "red"} bar`
+    barSpan.style = `height:${height}px;`
+    return barSpan
+
+}
+
+function overviewTimeBarChart(results) {
+    const barchartDiv = document.createElement("div")
+    barchartDiv.className = "barchart"
+    barchartDiv.append(...results.map(overviewTimeBar))
+
+    const baselineDiv = div("")
+    baselineDiv.className = "baseline"
+    barchartDiv.prepend(baselineDiv)
+    for (let i = 0; i < 6; i++) {
+        const guidelineDiv = div(`${(i+1)*10}s`)
+        guidelineDiv.className = "guideline"
+        guidelineDiv.style = `margin-bottom:${i*20}px;`
+        barchartDiv.prepend(guidelineDiv)
+    }
+    return barchartDiv
+}
+
+
 function enterOverviewMode(results) {
     const score = results.map(r => r.score()).reduce((a, b) => a + b)
     const numCorrect = results.map(r => r.check() ? 1 : 0).reduce((a, b) => a + b)
@@ -184,6 +211,7 @@ function enterOverviewMode(results) {
     overviewTable.append(overviewTableRow("Average time:", `${avgTime}s`))
     overviewTable.append(overviewTableRow("Final score:", `${score} out of 100`))
     document.body.prepend(overviewTableDiv)
+    document.body.prepend(overviewTimeBarChart(results))
 }
 
 function enterGameMode() {
@@ -270,4 +298,3 @@ startButton.addEventListener("click", event => {
     document.body.removeChild(startButtonDiv)
     enterGameMode()
 })
-
